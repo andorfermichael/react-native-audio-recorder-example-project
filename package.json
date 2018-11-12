@@ -10,7 +10,7 @@
   "dependencies": {
     "react": "16.6.1",
     "react-native": "0.57.1",
-    "react-native-native-audio-recorder": "^0.5.15"
+    "react-native-native-audio-recorder": "0.5.16"
   },
   "devDependencies": {
     "babel-preset-react-native": "5.0.2",
