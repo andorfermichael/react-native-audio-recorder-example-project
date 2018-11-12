@@ -9,14 +9,15 @@
   },
   "dependencies": {
     "react": "16.6.1",
-    "react-native": "0.57.1",
+    "react-native": "0.57.4",
     "react-native-native-audio-recorder": "0.5.16"
   },
   "devDependencies": {
-    "babel-preset-react-native": "5.0.2",
     "jest": "23.6.0",
+    "metro-react-native-babel-preset": "^0.49.0",
     "react-native-inhibit-warnings": "^1.0.1",
-    "react-test-renderer": "16.6.1"
+    "react-test-renderer": "16.6.1",
+    "schedule": "^0.4.0"
   },
   "jest": {
     "preset": "react-native"
