@@ -6,130 +6,127 @@
  * @flow
  */
 
-import React, {Component} from 'react';
-import {Button, Platform, StyleSheet, Text, View} from 'react-native';
+import React from 'react';
+import type { ElementRef } from 'react';
+import {Button, Dimensions, StyleSheet, View, ScrollView} from 'react-native';
 
 import { AudioRecorder, AudioPlayerPlot } from 'react-native-native-audio-recorder';
 
+
 type Props = {};
-export default class App extends Component<Props> {
-  state = {
-    isSetup: false,
-    isRecording: false,
-    fileUrl: ''
-  };
-
-  constructor(props) {
-    super(props);
-    this.recorderRef = React.createRef();
-    this.playerPlotRef = React.createRef();
-  }
-
-  renderRecorderStateText(isSetup, isRecording) {
-    if (!isSetup) {
-      return 'Not ready! Setup ...';
-    } else if (!isRecording) {
-      return 'Ready for recording';
-    } else if (isRecording) {
-      return 'Recording';
-    }
-  }
-
-  componentDidMount = () => {
-    this.recorderRef.setupRecorder()
-      .then((result) => {
-        const parsedResult = JSON.parse(result);
-
-        if (parsedResult['success']) {
-          this.setState({isSetup: true});
-        }
-      })
-      .catch(error => {
-        console.log(error.toString());
-      });
-  };
-
-  render() {
-    const { isSetup, isRecording } = this.state;
-
-    return (
-      <View style={styles.container}>
-        <AudioPlayerPlot ref={ (ref) => this.playerPlotRef = ref} />
-        <AudioRecorder ref={ (ref) => this.recorderRef = ref} />
-
-        {!!this.recorderRef &&
-        <View style={styles.innerContainer}>
-          {isSetup && !isRecording &&
-          <Button
-            style={styles.button}
-            onPress={() => {
-              this.recorderRef.startRecording()
-                .then((result) => {
-                  const parsedResult = JSON.parse(result);
-
-                  if (parsedResult['success']) {
-                    this.setState({isRecording: true});
-                    console.log('INFO: Recording started.')
-                  }
-                })
-                .catch(error => {
-                  console.log(error.toString());
-                })
-            }}
-            title={'Start Recording'}
-          />
-          }
-          {isSetup && isRecording &&
-          <Button
-            style={styles.button}
-            onPress={() => {
-              // Stop the recorder and get result incl. file url
-              const stopRecordingPromise = this.recorderRef.stopRecording();
-
-              // Create a waveform from the file with the given url
-              const renderByFilePromise = stopRecordingPromise.then((stopRecordingResult) => {
-                const parsedResult = JSON.parse(stopRecordingResult);
-
-                if (parsedResult['success']) {
-                  this.setState({isRecording: false});
-                  console.log('INFO: Recording stopped.');
-                  console.log(parsedResult['value']['fileUrl'])
-                }
-
-                return this.playerPlotRef.renderByFile(parsedResult['value']['fileUrl']);
-              });
-
-              // Check if rendering the waveform was successful
-              renderByFilePromise.then((renderByFileResult) => {
-                const parsedResult = JSON.parse(renderByFileResult);
-                if (parsedResult['success']) {
-                  console.log('INFO: Drawing waveform of file finished.')
-                }
-              })
-                .catch(error => {
-                  console.log(error.toString());
-                });
-
-            }}
-            title={'Stop Recording'}
-          />
-          }
-          <Text>Recorder State: {this.renderRecorderStateText(isSetup, isRecording)}</Text>
-        </View>
-        }
-      </View>
-    );
-  }
-}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    alignItems: 'center'
   },
-  innerContainer: {
-    position: 'absolute'
+  scruber: {
+    position: 'absolute',
+    left: Dimensions.get('window').width / 2,
+    backgroundColor: 'black',
+    width: 5,
+    height: '100%'
   }
 });
+
+export default class App extends React.Component<Props> {
+  audioRecorderRef: ?ElementRef<AudioRecorder> = null;
+
+  audioPlayerPlotRef: ?ElementRef<AudioPlayerPlot> = null;
+
+  scrollViewRef: ?ElementRef<ScrollView> = null;
+
+/*  state = {
+    isSetup: false,
+    isRecording: false,
+    fileUrl: ''
+  };*/
+
+  componentDidMount = () => {
+    if (this.audioRecorderRef) {
+      this.audioRecorderRef.setupRecorder();
+    }
+  };
+
+  setAudioRecorderRef = (ref: ElementRef<AudioRecorder>) => {
+    this.audioRecorderRef = ref;
+  };
+
+  setAudioPlayerPlotRef = (ref: ElementRef<AudioPlayerPlot>) => {
+    this.audioPlayerPlotRef = ref;
+  };
+
+  setScrollViewRef = (ref: ElementRef<any>) => {
+    this.scrollViewRef = ref;
+  };
+
+  handleStartRecording = () => {
+    if (this.audioRecorderRef) {
+      this.audioRecorderRef.startRecording();
+    }
+  };
+
+  handleStopRecording = () => {
+    if (this.audioRecorderRef) {
+      this.audioRecorderRef.stopRecording()
+        .then(params => {
+          const {
+            value: { fileUrl: url, fileDurationInMs: duration }
+          } = params;
+
+          console.log(params)
+
+          const currentTrack = {
+            id: url,
+            url: `file:///${url}`,
+            duration: duration,
+            title: 'Recording',
+            artist: 'me'
+          };
+        });
+    }
+  };
+
+  handlePlayRecording = () => {
+    this.audioPlayerPlotRef.renderByFile();
+    this.forceUpdate();
+  };
+
+  render() {
+    const { windowWidth } = Dimensions.get('window');
+    const recorderHeight = 200;
+/*    const pixelsPerSecond = windowWidth / 6;
+    const plotWidth = (trackDuration / 1000) * PIXELS_PER_SECOND + windowWidth;*/
+
+    return (
+      <View style={styles.container}>
+{/*        <DummyWaveLine width={windowWidth} height={plotHeight} />
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          ref={this.setScrollViewRef}
+        >
+          {!!trackUrl && (
+            <AudioPlayerPlot
+              width={plotWidth}
+              height={plotHeight}
+              pixelsPerSecond={pixelsPerSecond}
+              ref={this.setAudioPlayerPlotRef}
+            />
+          )}
+        </ScrollView>*/}
+
+        <AudioRecorder
+          width={windowWidth}
+          height={recorderHeight}
+          ref={this.setAudioRecorderRef}
+        />
+
+        <Button title="Start Recording" onPress={this.handleStartRecording} />
+        <Button title="Stop Recording" onPress={this.handleStopRecording} />
+        <Button title="Play Recording" onPress={this.handlePlayRecording} />
+      </View>
+    );
+  }
+}
