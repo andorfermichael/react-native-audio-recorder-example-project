@@ -1161,7 +1161,7 @@
 				PRODUCT_NAME = RNNativeAudioRecorderExample;
 				SWIFT_OBJC_BRIDGING_HEADER = "RNNativeAudioRecorderExample-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.2;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -1192,7 +1192,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.audvice.RNNativeAudioRecorderExample;
 				PRODUCT_NAME = RNNativeAudioRecorderExample;
 				SWIFT_OBJC_BRIDGING_HEADER = "RNNativeAudioRecorderExample-Bridging-Header.h";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.2;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
