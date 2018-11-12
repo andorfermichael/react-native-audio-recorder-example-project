@@ -1,3 +1,9 @@
 rootProject.name = 'RNNativeAudioRecorderExample'
+include ':react-native-video'
+project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android-exoplayer')
+include ':react-native-svg'
+project(':react-native-svg').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-svg/android')
+include ':react-native-native-audio-recorder'
+project(':react-native-native-audio-recorder').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-native-audio-recorder/android')
 
 include ':app'
