@@ -8,16 +8,15 @@
     "inhibit-third-party-warnings": "react-native-inhibit-warnings"
   },
   "dependencies": {
-    "react": "16.4.1",
-    "react-native": "0.56.0",
-    "react-native-native-audio-recorder": "github:audvice/react-native-audio-recorder#develop"
+    "react": "16.6.1",
+    "react-native": "0.57.1",
+    "react-native-native-audio-recorder": "^0.5.15"
   },
   "devDependencies": {
-    "babel-jest": "23.4.2",
     "babel-preset-react-native": "5.0.2",
-    "jest": "23.5.0",
+    "jest": "23.6.0",
     "react-native-inhibit-warnings": "^1.0.1",
-    "react-test-renderer": "16.4.1"
+    "react-test-renderer": "16.6.1"
   },
   "jest": {
     "preset": "react-native"
