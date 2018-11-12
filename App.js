@@ -37,11 +37,10 @@ export default class App extends React.Component<Props> {
 
   scrollViewRef: ?ElementRef<ScrollView> = null;
 
-/*  state = {
-    isSetup: false,
-    isRecording: false,
-    fileUrl: ''
-  };*/
+  state = {
+    track: null,
+    isPlaying: false
+  };
 
   componentDidMount = () => {
     if (this.audioRecorderRef) {
@@ -62,6 +61,8 @@ export default class App extends React.Component<Props> {
   };
 
   handleStartRecording = () => {
+    this.setState({isPlaying: false});
+
     if (this.audioRecorderRef) {
       this.audioRecorderRef.startRecording();
     }
@@ -75,39 +76,46 @@ export default class App extends React.Component<Props> {
             value: { fileUrl: url, fileDurationInMs: duration }
           } = params;
 
-          console.log(params)
-
           const currentTrack = {
-            id: url,
             url: `file:///${url}`,
-            duration: duration,
-            title: 'Recording',
-            artist: 'me'
+            duration: duration
           };
+
+          this.setState({track: currentTrack});
+          this.setState({isPlaying: true});
         });
     }
   };
 
   handlePlayRecording = () => {
-    this.audioPlayerPlotRef.renderByFile();
-    this.forceUpdate();
+    if (this.audioPlayerPlotRef) {
+      this.audioPlayerPlotRef.renderByFile(this.state.track.url);
+      this.forceUpdate();
+    }
   };
 
   render() {
-    const { windowWidth } = Dimensions.get('window');
-    const recorderHeight = 200;
-/*    const pixelsPerSecond = windowWidth / 6;
-    const plotWidth = (trackDuration / 1000) * PIXELS_PER_SECOND + windowWidth;*/
+    const { width: windowWidth } = Dimensions.get('window');
+
+    const plotHeight = 200;
+    let pixelsPerSecond = null;
+    let plotWidth = null;
+
+    if (this.state.track != null) {
+      pixelsPerSecond = windowWidth / 6;
+      plotWidth = (parseInt(this.state.track) / 1000) * pixelsPerSecond + windowWidth;
+    }
+
+    console.log(this.state.isPlaying);
 
     return (
       <View style={styles.container}>
-{/*        <DummyWaveLine width={windowWidth} height={plotHeight} />
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           ref={this.setScrollViewRef}
         >
-          {!!trackUrl && (
+          {!!this.state.isPlaying && (
             <AudioPlayerPlot
               width={plotWidth}
               height={plotHeight}
@@ -115,11 +123,11 @@ export default class App extends React.Component<Props> {
               ref={this.setAudioPlayerPlotRef}
             />
           )}
-        </ScrollView>*/}
+        </ScrollView>
 
         <AudioRecorder
           width={windowWidth}
-          height={recorderHeight}
+          height={plotHeight}
           ref={this.setAudioRecorderRef}
         />
 
