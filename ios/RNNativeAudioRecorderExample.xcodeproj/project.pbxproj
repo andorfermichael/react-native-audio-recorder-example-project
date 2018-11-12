@@ -1147,6 +1147,7 @@
 					"$(SRCROOT)/../node_modules/react-native-native-audio-recorder/ios/**",
 				);
 				INFOPLIST_FILE = RNNativeAudioRecorderExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1178,6 +1179,7 @@
 					"$(SRCROOT)/../node_modules/react-native-native-audio-recorder/ios/**",
 				);
 				INFOPLIST_FILE = RNNativeAudioRecorderExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
