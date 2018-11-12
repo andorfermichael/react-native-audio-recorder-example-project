@@ -10,7 +10,10 @@
   "dependencies": {
     "react": "16.6.1",
     "react-native": "0.57.4",
-    "react-native-native-audio-recorder": "0.5.16"
+    "react-native-native-audio-recorder": "0.5.16",
+    "react-native-svg": "^8.0.8",
+    "react-native-video": "^3.2.1",
+    "styled-components": "^4.0.3"
   },
   "devDependencies": {
     "jest": "23.6.0",
