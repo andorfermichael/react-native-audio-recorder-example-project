@@ -2,6 +2,7 @@
 
 buildscript {
     repositories {
+        google()
         jcenter()
         maven {
             url 'https://maven.google.com/'
@@ -34,9 +35,19 @@ allprojects {
 }
 
 ext {
-    buildToolsVersion = "28"
-    minSdkVersion = 16
+    minSdkVersion = 25
     compileSdkVersion = 28
     targetSdkVersion = 28
-    supportLibVersion = "26"
+    supportLibVersion = "27"
+}
+
+subprojects {
+    afterEvaluate {
+        project -> if (project.hasProperty("android")) {
+            android {
+                compileSdkVersion 28
+                buildToolsVersion '28.0.2'
+            }
+        }
+    }
 }

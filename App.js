@@ -6,130 +6,170 @@
  * @flow
  */
 
-import React, {Component} from 'react';
-import {Button, Platform, StyleSheet, Text, View} from 'react-native';
+import React from 'react';
+import type { ElementRef } from 'react';
+import {Button, Dimensions, StyleSheet, View, ScrollView} from 'react-native';
+
+import DummyWaveLine from './DummyWaveLine';
+
+import Video from 'react-native-video';
 
 import { AudioRecorder, AudioPlayerPlot } from 'react-native-native-audio-recorder';
 
+
 type Props = {};
-export default class App extends Component<Props> {
-  state = {
-    isSetup: false,
-    isRecording: false,
-    fileUrl: ''
-  };
-
-  constructor(props) {
-    super(props);
-    this.recorderRef = React.createRef();
-    this.playerPlotRef = React.createRef();
-  }
-
-  renderRecorderStateText(isSetup, isRecording) {
-    if (!isSetup) {
-      return 'Not ready! Setup ...';
-    } else if (!isRecording) {
-      return 'Ready for recording';
-    } else if (isRecording) {
-      return 'Recording';
-    }
-  }
-
-  componentDidMount = () => {
-    this.recorderRef.setupRecorder()
-      .then((result) => {
-        const parsedResult = JSON.parse(result);
-
-        if (parsedResult['success']) {
-          this.setState({isSetup: true});
-        }
-      })
-      .catch(error => {
-        console.log(error.toString());
-      });
-  };
-
-  render() {
-    const { isSetup, isRecording } = this.state;
-
-    return (
-      <View style={styles.container}>
-        <AudioPlayerPlot ref={ (ref) => this.playerPlotRef = ref} />
-        <AudioRecorder ref={ (ref) => this.recorderRef = ref} />
-
-        {!!this.recorderRef &&
-        <View style={styles.innerContainer}>
-          {isSetup && !isRecording &&
-          <Button
-            style={styles.button}
-            onPress={() => {
-              this.recorderRef.startRecording()
-                .then((result) => {
-                  const parsedResult = JSON.parse(result);
-
-                  if (parsedResult['success']) {
-                    this.setState({isRecording: true});
-                    console.log('INFO: Recording started.')
-                  }
-                })
-                .catch(error => {
-                  console.log(error.toString());
-                })
-            }}
-            title={'Start Recording'}
-          />
-          }
-          {isSetup && isRecording &&
-          <Button
-            style={styles.button}
-            onPress={() => {
-              // Stop the recorder and get result incl. file url
-              const stopRecordingPromise = this.recorderRef.stopRecording();
-
-              // Create a waveform from the file with the given url
-              const renderByFilePromise = stopRecordingPromise.then((stopRecordingResult) => {
-                const parsedResult = JSON.parse(stopRecordingResult);
-
-                if (parsedResult['success']) {
-                  this.setState({isRecording: false});
-                  console.log('INFO: Recording stopped.');
-                  console.log(parsedResult['value']['fileUrl'])
-                }
-
-                return this.playerPlotRef.renderByFile(parsedResult['value']['fileUrl']);
-              });
-
-              // Check if rendering the waveform was successful
-              renderByFilePromise.then((renderByFileResult) => {
-                const parsedResult = JSON.parse(renderByFileResult);
-                if (parsedResult['success']) {
-                  console.log('INFO: Drawing waveform of file finished.')
-                }
-              })
-                .catch(error => {
-                  console.log(error.toString());
-                });
-
-            }}
-            title={'Stop Recording'}
-          />
-          }
-          <Text>Recorder State: {this.renderRecorderStateText(isSetup, isRecording)}</Text>
-        </View>
-        }
-      </View>
-    );
-  }
-}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  innerContainer: {
-    position: 'absolute'
+    alignItems: 'center'
   }
 });
+
+export default class App extends React.Component<Props> {
+  audioRecorderRef: ?ElementRef<AudioRecorder> = null;
+
+  audioPlayerPlotRef: ?ElementRef<AudioPlayerPlot> = null;
+
+  scrollViewRef: ?ElementRef<ScrollView> = null;
+
+  playerRef: ?ElementRef<Video> = null;
+
+  state = {
+    track: null,
+    isRecording: false,
+    isPlaying: false
+  };
+
+  componentDidMount = () => {
+    if (this.audioRecorderRef) {
+      this.audioRecorderRef.setupRecorder();
+    }
+  };
+
+  setAudioRecorderRef = (ref: ElementRef<AudioRecorder>) => {
+    this.audioRecorderRef = ref;
+  };
+
+  setAudioPlayerPlotRef = (ref: ElementRef<AudioPlayerPlot>) => {
+    this.audioPlayerPlotRef = ref;
+  };
+
+  setScrollViewRef = (ref: ElementRef<any>) => {
+    this.scrollViewRef = ref;
+  };
+
+  setPlayerRef = (playerRef: ?ElementRef<Video>) => {
+    this.playerRef = playerRef;
+  };
+
+  handleTrackLoad = () => {
+    this.setState({isPlaying: true});
+
+    this.playerRef.seek(0);
+  };
+
+  handlePlaybackEnd = () => {
+    this.setState({isPlaying: false});
+
+    this.playerRef.seek(0);
+
+    this.forceUpdate();
+  };
+
+
+  handleStartRecording = () => {
+    if (this.audioRecorderRef) {
+      this.setState({isRecording: true});
+      this.audioRecorderRef.startRecording();
+    }
+  };
+
+  handleStopRecording = () => {
+    if (this.audioRecorderRef) {
+      this.setState({isRecording: false});
+      this.audioRecorderRef.stopRecording()
+        .then(params => {
+          const {
+            value: { fileUrl: url, fileDurationInMs: duration }
+          } = params;
+
+          const currentTrack = {
+            url: `file:///${url}`,
+            duration: duration
+          };
+
+          this.setState({track: currentTrack});
+        })
+        .then(params => {
+          // TODO: This line makes leads to app crash because it executes the rendering of the file waveform
+          // TODO: However the file is not ready at this point of time
+          // this.audioPlayerPlotRef.renderByFile(this.state.track.url);
+          this.forceUpdate();
+        });
+    }
+  };
+
+  handlePlayRecording = () => {
+    const playing = !this.state.isPlaying;
+
+    this.setState({isPlaying: playing});
+
+    this.forceUpdate();
+  };
+
+  render() {
+    const { width: windowWidth } = Dimensions.get('window');
+
+    const plotHeight = 200;
+    let pixelsPerSecond = null;
+    let plotWidth = null;
+
+    if (this.state.track != null) {
+      pixelsPerSecond = windowWidth / 6;
+      plotWidth = (parseInt(this.state.track.duration) / 1000) * pixelsPerSecond + windowWidth;
+    }
+
+    return (
+      <View style={styles.container}>
+        <DummyWaveLine width={windowWidth} height={plotHeight} />
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          ref={this.setScrollViewRef}
+        >
+          {!!this.state.track && (
+            <AudioPlayerPlot
+              width={plotWidth}
+              height={plotHeight}
+              pixelsPerSecond={pixelsPerSecond}
+              ref={this.setAudioPlayerPlotRef}
+            />
+          )}
+
+          {this.state.isPlaying && (
+            <Video
+              audioOnly
+              paused={!this.state.isPlaying}
+              source={{ uri: this.state.track.url }}
+              ref={this.setPlayerRef}
+              onLoad={this.handleTrackLoad}
+              onEnd={this.handlePlaybackEnd}
+            />
+          )}
+        </ScrollView>
+
+        <AudioRecorder
+          width={windowWidth}
+          height={plotHeight}
+          ref={this.setAudioRecorderRef}
+        />
+
+        <Button title="Start Recording" onPress={this.handleStartRecording} disabled={this.state.isRecording} />
+        <Button title="Stop Recording" onPress={this.handleStopRecording} disabled={!this.state.isRecording} />
+        <Button title="Play Recording" onPress={this.handlePlayRecording} disabled={this.state.isRecording || !this.state.track}/>
+      </View>
+    );
+  }
+}
