@@ -105,7 +105,7 @@ export default class App extends React.Component<Props> {
         .then(params => {
           // TODO: This line makes leads to app crash because it executes the rendering of the file waveform
           // TODO: However the file is not ready at this point of time
-          // this.audioPlayerPlotRef.renderByFile(this.state.track.url);
+          this.audioPlayerPlotRef.renderByFile(this.state.track.url);
           this.forceUpdate();
         });
     }
