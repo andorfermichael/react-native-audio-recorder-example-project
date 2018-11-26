@@ -92,26 +92,23 @@ export default class App extends React.Component<Props> {
       this.audioRecorderRef.stopRecording()
         .then(params => {
           const {
-            value: { fileUrl: url, fileDurationInMs: duration }
+            value: { fileName: name, fileDurationInMs: duration }
           } = params;
 
           const currentTrack = {
-            url: `file:///${url}`,
+            fileName: name + `?timestamp=123456`,
             duration: duration
           };
 
           this.setState({track: currentTrack});
         })
-        .then(params => {
-          // TODO: This line makes leads to app crash because it executes the rendering of the file waveform
-          // TODO: However the file is not ready at this point of time
-          this.audioPlayerPlotRef.renderByFile(this.state.track.url);
-          this.forceUpdate();
-        });
     }
   };
 
   handlePlayRecording = () => {
+    this.audioPlayerPlotRef.renderByFile(this.state.track.fileName);
+    this.forceUpdate();
+
     const playing = !this.state.isPlaying;
 
     this.setState({isPlaying: playing});
@@ -129,35 +126,24 @@ export default class App extends React.Component<Props> {
     if (this.state.track != null) {
       pixelsPerSecond = windowWidth / 6;
       plotWidth = (parseInt(this.state.track.duration) / 1000) * pixelsPerSecond + windowWidth;
+    } else {
+      pixelsPerSecond = windowWidth / 6;
+      plotWidth = windowWidth;
     }
 
     return (
       <View style={styles.container}>
-        <DummyWaveLine width={windowWidth} height={plotHeight} />
         <ScrollView
           horizontal
-          showsHorizontalScrollIndicator={false}
+          showsHorizontalScrollIndicator
           ref={this.setScrollViewRef}
         >
-          {!!this.state.track && (
-            <AudioPlayerPlot
-              width={plotWidth}
-              height={plotHeight}
-              pixelsPerSecond={pixelsPerSecond}
-              ref={this.setAudioPlayerPlotRef}
-            />
-          )}
-
-          {this.state.isPlaying && (
-            <Video
-              audioOnly
-              paused={!this.state.isPlaying}
-              source={{ uri: this.state.track.url }}
-              ref={this.setPlayerRef}
-              onLoad={this.handleTrackLoad}
-              onEnd={this.handlePlaybackEnd}
-            />
-          )}
+          <AudioPlayerPlot
+            width={plotWidth}
+            height={plotHeight}
+            pixelsPerSecond={pixelsPerSecond}
+            ref={this.setAudioPlayerPlotRef}
+          />
         </ScrollView>
 
         <AudioRecorder
