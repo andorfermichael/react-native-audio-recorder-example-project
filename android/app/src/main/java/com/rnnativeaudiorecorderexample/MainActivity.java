@@ -50,6 +50,4 @@ public class MainActivity extends ReactActivity {
                 123);
         }
     }
-
->>>>>>> develop
 }
