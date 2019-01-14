@@ -1,6 +1,6 @@
 # react-native-audio-recorder-example-project
 
-A minimal working example project for [React-Native-Native-Audio-Recorder](https://github.com/audvice/react-native-audio-recorder).
+A minimal working example project for [React-Native-Native-Audio-Recorder](https://github.com/audvice/react-native-native-audio-recorder).
 
 ## Getting started
 
