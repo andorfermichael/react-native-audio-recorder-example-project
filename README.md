@@ -15,7 +15,9 @@ A minimal working example project for [React-Native-Native-Audio-Recorder](https
 3. Install NPM packages:  
 `$ npm install`
 
-4. Ensure that all packages are correctly linked by running:
+4. Follow carefully the instructions of react-native-native-audio-recorder [ Readme](https://github.com/audvice/react-native-native-audio-recorder/blob/master/README.md) for integrating the audio recorder module.
+
+5. Ensure that all packages are correctly linked by running:  
 `react-native link`
 
 #### iOS
